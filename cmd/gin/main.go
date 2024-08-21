@@ -5,11 +5,15 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"log"
+	"context"
 )
 
 func main() {
 
 	router := gin.New()
+
+	router.Use(Authorization())
 
 	router.GET("/", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{
@@ -60,3 +64,24 @@ func main() {
 	router.Run(config.APP_PORT)
 
 }
+
+func Authorization() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		// do process validation
+		// get user id from token
+		userId := 10
+
+		log.Println("Authrorization: set user id with", userId)
+        // get context
+		myCtx := ctx.Request.Context()
+        // set context
+		myCtx = context.WithValue(myCtx, "USER_ID", userId)
+        // get request with new context
+		req := ctx.Request.WithContext(myCtx)
+        // change the request to new request with new context
+		ctx.Request = req
+		ctx.Next()
+
+	}
+}
+
